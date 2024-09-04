@@ -70,7 +70,7 @@ jobs:
                     host: ${{ secrets.HOST }}
                     username: ${{ secrets.USERNAME }}
                     key: ${{ secrets.KEY }}
-                    port: 1048
+                    port: 22
                     source: "docker-compose.yml, nginx/nginx.conf"
                     target: .
             -   name: run docker-compose
