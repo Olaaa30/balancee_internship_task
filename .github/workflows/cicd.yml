@@ -1,0 +1,75 @@
+name: Test, Build, Push, Deploy
+on:
+    push:
+        branches:
+            - main
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        environment: staging
+        strategy:
+            matrix:
+                node-version: [18.x]
+        steps:
+            -   uses: actions/checkout@v3
+            -   name: Use Node.js ${{ matrix.node-version }}
+                uses: actions/setup-node@v3
+                with:
+                    node-version: ${{ matrix.node-version }}
+                    cache: "npm"
+            -   run: npm install
+            -   run: npm run build
+    build_container_and_push:
+        name: Push Docker image to Hub
+        runs-on: ubuntu-latest
+        needs: [ build ]
+        steps:
+        -   name: Check out the repo
+            uses: actions/checkout@v4
+        -   name: Log in to Docker Hub
+            uses: docker/login-action@v3
+            with:
+                username: ${{ secrets.DOCKER_USERNAME }}
+                password: ${{ secrets.DOCKER_TOKEN }}
+        -   name: Extract metadata (tags, labels) for Docker
+            id: meta
+            uses: docker/metadata-action@v5
+            with:
+                images: olayinkaadebisi/demo-app
+        -   name: Build and push Docker image
+            uses: docker/build-push-action@v5
+            with:
+                context: .
+                file: ./dockerfile
+                push: true
+                tags: ${{ secrets.DOCKER_USERNAME}}/demo-app:latest
+                labels: ${{ steps.meta.outputs.labels }}
+
+    deploy:
+        runs-on: ubuntu-latest
+        if: ${{ github.ref == 'refs/heads/main' }}
+        needs: [ build_container_and_push ]
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+            -   name: copy file via ssh key
+                uses: appleboy/scp-action@v0.1.4
+                with:
+                    host: ${{ secrets.HOST }}
+                    username: ${{ secrets.USERNAME }}
+                    key: ${{ secrets.KEY }}
+                    port: 1048
+                    source: "docker-compose.yml, nginx/nginx.conf"
+                    target: .
+            -   name: run docker-compose
+                uses: appleboy/ssh-action@v1.0.0
+                with:
+                    host: ${{ secrets.HOST }}
+                    username: ${{ secrets.USERNAME }}
+                    key: ${{ secrets.KEY }}
+                    port: 22
+                    script: |
+                        docker-compose down
+                        docker rmi -f $(docker images -q)
+                        docker-compose pull
+                        docker-compose up -d

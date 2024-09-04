@@ -1,0 +1,30 @@
+services:
+  web:
+      image: olayinkaadebisi/demo-app:latest
+      container_name: web
+      ports:
+        - "3000:3000"
+      restart: unless-stopped
+      logging:
+        driver: "json-file"
+        options:
+          max-file: "1"
+          max-size: "100k"
+  nginx:
+      restart: unless-stopped
+      image: nginx:alpine
+      container_name: nginx
+      ports:
+        - "80:80"
+      volumes:
+        - ./nginx/:/etc/nginx/user_conf.d:ro
+      depends_on:
+        - web
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "100k"
+          max-file: "1"
+
+volumes:
+  nginx:
