@@ -1,4 +1,4 @@
-# Project Name
+# Balancee Internship Task
 
 This project is a web application built using Next.js, containerized with Docker, and deployed using a CI/CD pipeline powered by GitHub Actions. Nginx is used as a reverse proxy to manage incoming traffic to the application and the goal is to ensure a smooth and automated deployment process, with each stage of the pipeline building on the previous one.
 
