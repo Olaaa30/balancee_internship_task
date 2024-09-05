@@ -12,7 +12,7 @@ This project is a web application built using Next.js, containerized with Docker
 ## Setup
 
 ### Docker
-We use Docker to containerize the Next.js app, this ensures consistency across all environments. A `Dockerfile` is created for the app, which installs dependencies, builds the application, and serves it in the staging environment.
+I used Docker to containerize the Next.js app, this ensures consistency across all environments. A `Dockerfile` is created for the app, which installs dependencies, builds the application, and serves it in the staging environment.
 
 ### Docker Compose
 `docker-compose.yml` is used to orchestrate the Next.js app and Nginx containers, providing an easy way to manage multi-container applications.
